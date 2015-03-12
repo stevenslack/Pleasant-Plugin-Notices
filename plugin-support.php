@@ -1,3 +1,5 @@
+<?php
+
 /**
  * Theme Dependency Admin Notice
  * 
