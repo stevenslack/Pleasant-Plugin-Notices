@@ -13,9 +13,9 @@ function s2_theme_plugin_dependency() {
 	foreach ( $plugin_slugs as $slug => $data ) {
 
 		// if the plugin is not active display the notice
-	    if ( is_plugin_active( $data['plugin_path'] ) ) {
-	    	continue;
-	    }
+		if ( is_plugin_active( $data['plugin_path'] ) ) {
+		    continue;
+		}
 	 
 	 	// the URL for the thickbox
 		$thickbox_url = sprintf( 'plugin-install.php?tab=plugin-information&plugin=%s&TB_iframe=true&width=600&height=550', $slug );
@@ -43,12 +43,12 @@ add_action( 'admin_notices', 's2_theme_plugin_dependency' );
 /**
  * The Plugins which are required by this theme
  * 
- * @param  array 	$plugins  Plugins required for theme
- * @return array    Plugins to be passed in the s2_theme_plugin_dependency
+ * @param  array   $plugins  Plugins required for theme
+ * @return array             Plugins to be passed in the s2_theme_plugin_dependency
  */
 function my_plugin_dependencies( $plugins ) {
 
-	$plugins['cmb2'] = array(             // the plugin slug
+	$plugins['cmb2'] = array(                 // the plugin slug
 		'name'        => 'CMB2',          // the plugin nice name
 		'plugin_path' => 'cmb2/init.php', // the path to the initial plugin file
 	);
