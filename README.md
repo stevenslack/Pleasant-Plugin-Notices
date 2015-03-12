@@ -11,7 +11,7 @@ No warning notices, no error messages, just a nice way of saying, "Hey, you need
 
 Here is an example of adding the CMB2 plugin:
 ```
-$plugins['cmb2'] = array(              // the plugin slug
+$plugins['cmb2'] = array(             // the plugin slug
 	'name'        => 'CMB2',          // the plugin nice name
 	'plugin_path' => 'cmb2/init.php', // the path to the initial plugin file
 );
