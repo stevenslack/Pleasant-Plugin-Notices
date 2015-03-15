@@ -9,11 +9,14 @@ class Pleasant_Plugin_Notices {
 	// WordPress plugin thickbox url, used on the plugins page
 	private $thickbox_url_pattern = 'plugin-install.php?tab=plugin-information&plugin=%s&TB_iframe=true&width=600&height=550';
 
-	// anchor tag with thickbox properties
+	// Anchor tag with thickbox properties
 	private $thickbox_link_pattern = '<a href="%1$s" class="thickbox">%2$s</a>';
 
 	// non-thickbox anchor tag
 	private $link_pattern = '<a href="%1$s" target="_blank">%2$s</a>';
+
+	// The notice prefix
+	private $notice_prefix = ''
 
 	// Generic notice text
 	private $notice_text_pattern = '';
@@ -50,6 +53,8 @@ class Pleasant_Plugin_Notices {
 	 * Hook into WordPress
 	 */
 	function __construct(){
+
+		$this->notice_prefix = __( 'Theme dependency notice', 'pleasant-plugin-notices' );
 
 		$this->notice_text_pattern = __( 'This theme requires the %s plugin', 'pleasant-plugin-notices' );
 
@@ -218,7 +223,7 @@ class Pleasant_Plugin_Notices {
 	function output_notice( $notice_text ) {
 		?>
 		<div class="error">
-			<p><strong><?php _e( 'Theme dependency warning', 'pleasant-plugin-notices' ) ?>: </strong><?php echo $notice_text; ?></p>
+			<p><strong><?php echo $this->$notice_prefix; ?>: </strong><?php echo $notice_text; ?></p>
 		</div>
 		<?php
 	}
