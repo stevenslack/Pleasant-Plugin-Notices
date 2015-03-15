@@ -6,15 +6,60 @@ No warning notices, no error messages, just a nice way of saying, "Hey, you need
 
 ### Installing
 
-1. Add the functions in the `plugin-support.php` file in your theme.
-2. Edit the `s2_plugins_required` function and add the plugins needed for your theme as shown below.
+1. Download the library to your theme
+1. In your functions.php file, include the library and initialize it
+    ```
+    if ( is_admin() ){
+      include_once get_stylesheet_directory().'/s2-plugin-dependency/plugin-support.php';
+      new S2_Plugin_Dependency();
+    }
+    ```
 
-Here is an example of adding the CMB2 plugin:
+1. Add a filter for `s2_plugin_dependencies` function.
+    ```
+	function my_theme_dependencies( $plugins ){
+		return $plugins;
+	}
+	add_filter( 's2_plugin_dependencies', 'my_theme_dependencies' );
+	```
+
+1. And add each dependency to the `$plugins` array along with its details.
+	```
+	$plugins['plugin-slug'] = array(
+
+      // not necessary for plugins in the WP.org repo, but can be used if desired
+      // defaults to plugin-slug
+      'name' => 'Plugin Nice Name',
+
+      // required for public, non-repo plugins.
+      // should be a website where the plugin can be purchased or downloaded
+      'plugin_url' => 'http://example.com',
+
+      // default to true
+      // set as false if the plugin can not be downloaded from a website
+      'public' => true,
+
+      // override the default plugin download notice with your own text & html
+      'notice' => 'This text will completely override the admin notice. It can accept <a href="http://example.com">anchor tags</a>, line breaks, <em>emphasis</em>, and <strong>strong words</strong>.',
+    );
+	```
+
+### All together now, using CMB2:
+
 ```
-$plugins['cmb2'] = array(             // the plugin slug
-	'name'        => 'CMB2',          // the plugin nice name
-	'plugin_path' => 'cmb2/init.php', // the path to the initial plugin file
-);
+if ( is_admin() ){
+  include_once get_stylesheet_directory().'/path-to-library/plugin-support.php';
+  new S2_Plugin_Dependency();
+}
+
+function my_theme_dependencies( $plugins ){
+	$plugins['cmb2'] = array(
+	  'name' => 'CMB2',
+	);
+	return $plugins;
+}
+add_filter( 's2_plugin_dependencies', 'my_theme_dependencies' );
 ```
 
 Version: 1.0
+

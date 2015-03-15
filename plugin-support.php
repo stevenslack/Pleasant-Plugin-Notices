@@ -1,136 +1,205 @@
 <?php
 
-function s2_get_plugin_data_from_slug( $plugin_slug ) {
+// TODO license & credits
 
-    if ( ! function_exists('get_plugins') ){
-    	require_once ABSPATH . 'wp-admin/includes/plugin.php';
-    }
-    $plugin_data = FALSE;
+if ( ! defined('ABSPATH') ) die;
 
+class S2_Plugin_Dependency {
+
+  // WordPress plugin thickbox url, used on the plugins page
+  private $thickbox_url_pattern = 'plugin-install.php?tab=plugin-information&plugin=%s&TB_iframe=true&width=600&height=550';
+
+  // anchor tag with thickbox properties
+  private $thickbox_link_pattern = '<a href="%1$s" class="thickbox">%2$s</a>';
+
+  // non-thickbox anchor tag
+  private $link_pattern = '<a href="%1$s" target="_blank">%2$s</a>';
+
+  // Generic notice text
+  private $notice_text_pattern = 'This theme requires the %s plugin';
+
+  // almost everything defaults to false for easy logic when parsing
+  // the exception being 'public', since true is the most-likely use-case
+  private $default_dependency = array(
+	'name' => false,
+	'plugin_url' => false,
+	'public' => true,
+	'notice' => false,
+	'plugin_data' => false,
+  );
+
+  // the wp_kses allowed_html arguements
+  // for when an dependency provides a custom notice
+  private $notice_allowed_html = array(
+	'a' => array(
+	  'href' => array(),
+	  'title' => array(),
+	  'class' => array(),
+	),
+	'br' => array(),
+	'em' => array(),
+	'strong' => array(),
+  );
+
+  /**
+   * Hook into WordPress
+   */
+  function __construct(){
+	add_action( 'admin_notices', array( $this, 'check_dependencies' ) );
+  }
+
+  /**
+   * Gather all dependencies
+   *
+   * @return mixed|void
+   */
+  function get_dependencies(){
+	// The filter where all plugins needed will be passed
+	$dependencies = apply_filters( 's2_plugin_dependencies', array() );
+
+	// loop through dependencies and preprocess them
+	foreach ( $dependencies as $slug => $dependency ) {
+	  // merge with default values
+	  $dependency = wp_parse_args( $dependency, $this->default_dependency );
+
+	  // remember plugin data within the dependency for later
+	  $dependency['plugin_data'] = $this->get_plugin_data_from_slug( $slug );
+	  $dependency['slug'] = $slug;
+
+	  // get the dependency name if not defined
+	  if ( ! $dependency['name'] ) {
+		// plugin_data takes precedence
+		// default to slug
+		$dependency['name'] = ( $dependency['plugin_data'] ) ? $dependency['plugin_data']['Name'] : $dependency['slug'];
+	  }
+
+	  $dependencies[ $slug ] = $dependency;
+	}
+
+	return $dependencies;
+  }
+
+  /**
+   * Process dependencies and output any needed notices
+   */
+  function check_dependencies(){
+	$dependencies = $this->get_dependencies();
+
+	// loop through dependencies and process them as notices
+	foreach ( $dependencies as $slug => $dependency ){
+	  // if the plugin is active, do not display a notice
+	  if ( $dependency['plugin_data'] && isset( $dependency['plugin_data']['plugin_file'] ) && is_plugin_active( $dependency['plugin_data']['plugin_file'] ) ) {
+		continue;
+	  }
+
+	  // a custom notice overrides all other possible output
+	  if ( $dependency['notice'] ){
+		$notice_text = wp_kses( $dependency['notice'], $this->notice_allowed_html );
+	  }
+	  // otherwise, parse the dependency and create a notice_text
+	  else {
+		// the link in the notice which refers to the thickbox
+		if ( $dependency['public'] ) {
+		  $link_string = $this->make_link( $dependency );
+		}
+		// otherwise the dependency isn't publicly available, and has no link
+		else {
+		  $link_string = $dependency['name'];
+		}
+
+		// get the notice text
+		$notice_text = sprintf( __( $this->notice_text_pattern ), $link_string );
+	  }
+
+	  $this->output_notice( $notice_text );
+	}
+  }
+
+  /**
+   * Get the WordPress meta data for a plugin using its slug (directory)
+   *
+   * @param $plugin_slug
+   * @return bool|mixed
+   */
+  function get_plugin_data_from_slug( $plugin_slug ) {
+	if ( ! function_exists('get_plugins') ){
+	  require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	}
+	// default to false
+	$plugin_data = FALSE;
+
+	// get all plugins within the plugin-slug directory
 	$plugins = get_plugins( '/' . $plugin_slug ); // Retrieve all plugins.
 
 	if  ( ! empty( $plugins ) ){
-		$plugin_keys = array_keys( $plugins ); 
-		$plugin_data = array_shift( $plugins );
-		$plugin_data['plugin_file'] = $plugin_slug . '/' . $plugin_keys[0];
+	  // the keys of the returned array are the plugin file names
+	  $plugin_keys = array_keys( $plugins );
+
+	  // get the the first plugin returned
+	  $plugin_data = array_shift( $plugins );
+
+	  // construct the plugin_file from the plugin-slug (directory)
+	  // and the plugin's key (file name);
+	  $plugin_data['plugin_file'] = $plugin_slug . '/' . $plugin_keys[0];
 	}
-	
+
 	return $plugin_data;
+  }
 
-}
-
-/**
- * Theme Dependency Admin Notice
- * 
- * @return string | admin notices asking user to install plugins which the theme requires
- */
-function s2_theme_plugin_dependency() {
-
-	// The filter where all plugins needed will be passed
-	$plugin_slugs = apply_filters( 's2_plugin_dependencies', array() );
-
-	foreach ( $plugin_slugs as $slug => $data ) {
-
-		$plugin_data = s2_get_plugin_data_from_slug( $slug );
-
-		// if the plugin is not active display the notice
-		if ( $plugin_data && isset( $plugin_data['plugin_file'] ) && is_plugin_active( $plugin_data['plugin_file'] ) ) {
-			continue;
-		}
-
-		if ( ! isset( $data['notice'] ) ) {
-
-			if ( ! isset( $data['plugin_url'] ) ) {
-				// the URL for the thickbox
-				$thickbox_url = sprintf( 'plugin-install.php?tab=plugin-information&plugin=%s&TB_iframe=true&width=600&height=550', $slug );
-
-				if ( is_multisite() ) {
-					$url = network_admin_url( $thickbox_url );
-				} else {
-					$url = admin_url( $thickbox_url  );
-				}			
-
-			} else {
-
-				$url = $data['plugin_url'];
-			}
-
-			if  ( ! isset( $data['name'] ) && isset( $plugin_data['Name'] ) ){
-				$data['name'] = $plugin_data['Name'];
-			}
-
-			if ( isset( $data['public'] ) && $data['public'] === false ) {
-				$link_string = $data['name'];
-			}
-			else {
-				// the link in the notice which refers to the thickbox
-				$link_string = sprintf( '<a href="%1$s" class="thickbox">%2$s</a>', esc_url( $url ), $data['name'] );
-			}
-			
-			// get the notice text
-			$notice_text = sprintf( __( 'This theme requires the %s plugin' ), $link_string );
-
-		} else { 
-
-			$allowed_html = array(
-				'a' => array(
-			        'href' => array(),
-			        'title' => array()
-			    ),
-			    'br' => array(),
-			    'em' => array(),
-			    'strong' => array(),
-			);
-
-			$notice_text = wp_kses( $data['notice'], $allowed_html );
-
-		}
-		
-		?>
-		<div class="error">
-			<h5>Theme dependency warning<h5>
-			<p><?php echo $notice_text; ?></p>
-		</div>
-		<?php
-
+  /**
+   * Create a WordPress-admin-style thickbox popup link.
+   *
+   * @param $dependency
+   * @return string
+   */
+  function make_link( $dependency ) {
+	// get the url
+	// if plugin_url, we can't use thickbox
+	if ( $dependency['plugin_url'] ) {
+	  $link_url = $dependency['plugin_url'];
+	  $link_pattern = $this->link_pattern;
+	}
+	// no url, make a thickbox like the admin plugins page uses
+	else {
+	  $link_url = $this->make_thickbox_url( $dependency['slug'] );
+	  $link_pattern = $this->thickbox_link_pattern;
 	}
 
+	return sprintf( $link_pattern, esc_url( $link_url ), $dependency['name'] );
+  }
+
+  /**
+   * Make the appropriate thickbox url
+   *
+   * @param $plugin_slug
+   * @return string|void
+   */
+  function make_thickbox_url( $plugin_slug ){
+	// the URL for the thickbox
+	$thickbox_url = sprintf( $this->thickbox_url_pattern, $plugin_slug );
+
+	if ( is_multisite() ) {
+	  $url = network_admin_url( $thickbox_url );
+	}
+	else {
+	  $url = admin_url( $thickbox_url );
+	}
+
+	return $url;
+  }
+
+  /**
+   * Output HTML notice
+   *
+   * @param $notice_text
+   */
+  function output_notice( $notice_text ){
+	?>
+	<div class="error">
+	  <h5>Theme dependency warning<h5>
+		  <p><?php echo $notice_text; ?></p>
+	</div>
+  	<?php
+  }
 }
-add_action( 'admin_notices', 's2_theme_plugin_dependency' );
 
-
-/**
- * The Plugins which are required by this theme
- * 
- * @param  array 	$plugins  Plugins required for theme
- * @return array    Plugins to be passed in the s2_theme_plugin_dependency
- */
-function s2_plugins_required( $plugins ) {
-
-	$plugins['plugin-slug'] = array(
-		// not necessary for plugins in the WP.org repo, but can be used if desired
-		// require for non-repo plugins
-		'name' => 'Plugin Nice Name',
-		// required for non-repo plugins.
-		// should be a website where the plugin can be purchased or downloaded
-		'plugin_url' => 'http://sweetplugin.com',
-		// default to true, set as false if the plugin can not be downloaded from a website
-		'public' => true,
-		// override the default plugin download notice with your own text & html
-		'notice' => 'This text will completely override the admin notice. It can accept <a href="http://example.com">anchor tags</a>, line breaks, <em>emphasis</em>, and <strong>strong words</strong>.',
-	);
-
-	$plugins['cmb2'] = array();
-
-	$plugins['soliloquy'] = array(            
-		'name'        => 'Soliloquy',         
-		'plugin_url'  => 'http://soliloquywp.com', 
-	);
-
-	$plugins['s2-profiles'] = array(
-		'public' => false,
-	);
-
-	return $plugins;
-}
-add_filter( 's2_plugin_dependencies', 's2_plugins_required' );
