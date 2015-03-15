@@ -196,8 +196,8 @@ class S2_Plugin_Dependency {
   function output_notice( $notice_text ){
 	?>
 	<div class="error">
-	  <h5>Theme dependency warning<h5>
-		  <p><?php echo $notice_text; ?></p>
+	  <h5>Theme dependency warning</h5>
+	  <p><?php echo $notice_text; ?></p>
 	</div>
   	<?php
   }
