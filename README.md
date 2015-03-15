@@ -11,8 +11,8 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 	```php
 	if ( is_admin() ){
 		include_once get_stylesheet_directory().'/s2-plugin-dependency/plugin-support.php';
-		if ( class_exists( 'S2_Plugin_Dependency' ) ) {
-			new S2_Plugin_Dependency();
+		if ( class_exists( 'Pleasant_Plugin_Notices' ) ) {
+			new Pleasant_Plugin_Notices();
 		}
 	}
 	```
@@ -60,8 +60,8 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 	
 	if ( is_admin() ){
 		include_once get_stylesheet_directory() . '/path-to-library/plugin-support.php';
-		if ( class_exists( 'S2_Plugin_Dependency' ) ) {
-			new S2_Plugin_Dependency();
+		if ( class_exists( 'Pleasant_Plugin_Notices' ) ) {
+			new Pleasant_Plugin_Notices();
 		}
 	}
 

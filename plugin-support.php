@@ -4,7 +4,7 @@
 
 if ( ! defined('ABSPATH') ) die;
 
-class S2_Plugin_Dependency {
+class Pleasant_Plugin_Notices {
 
 	// WordPress plugin thickbox url, used on the plugins page
 	private $thickbox_url_pattern = 'plugin-install.php?tab=plugin-information&plugin=%s&TB_iframe=true&width=600&height=550';
@@ -223,5 +223,5 @@ class S2_Plugin_Dependency {
 		<?php
 	}
 
-} // end class S2_Plugin_Dependency
+} // end class Pleasant_Plugin_Notices
 
