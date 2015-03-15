@@ -6,6 +6,9 @@ if ( ! defined('ABSPATH') ) die;
 
 class Pleasant_Plugin_Notices {
 
+	// class instance
+	private static $instance = null;
+
 	// WordPress plugin thickbox url, used on the plugins page
 	private $thickbox_url_pattern = 'plugin-install.php?tab=plugin-information&plugin=%s&TB_iframe=true&width=600&height=550';
 
@@ -34,7 +37,7 @@ class Pleasant_Plugin_Notices {
 	);
 
 	/* 
-	 * the wp_kses allowed_html arguements
+	 * the wp_kses allowed_html arguments
 	 * for when an dependency provides a custom notice
 	 */ 
 	private $notice_allowed_html = array(
@@ -42,17 +45,31 @@ class Pleasant_Plugin_Notices {
 			'href'  => array(),
 			'title' => array(),
 			'class' => array(),
+			'target' => array(),
 		),
 		'br'     => array(),
 		'em'     => array(),
 		'strong' => array(),
 	);
 
+	/**
+	 * Get the library's instance.
+	 * Using singleton pattern so the library's construction can only happen once
+	 *
+	 * @return null|Pleasant_Plugin_Notices
+	 */
+	public static function get_instance() {
+		if (null === self::$instance) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
 
 	/**
 	 * Hook into WordPress
 	 */
-	function __construct(){
+	private function __construct(){
 
 		$this->notice_prefix = __( 'Theme dependency notice', 'pleasant-plugin-notices' );
 
@@ -230,3 +247,5 @@ class Pleasant_Plugin_Notices {
 
 } // end class Pleasant_Plugin_Notices
 
+// initialize the library
+Pleasant_Plugin_Notices::get_instance();
