@@ -1,6 +1,8 @@
 ## Pleasant Plugin Notices
 
-A super simple lightweight way to add admin notices to a theme when that requires a couple plugins for certain functionality. The notices will appear when the plugins you include are inactive. The notices will provide a link to the plugin installation window. That's it!
+A super simple way to add admin notices to a theme that requires plugins for certain functionality. The notices will appear when the plugins you include are inactive.
+
+That's it!
 
 No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might need this plugin."
 
@@ -67,5 +69,5 @@ function my_theme_dependencies( $plugins ){
 add_filter( 'pleasant_plugin_notices', 'my_theme_dependencies' );	
 ```
 
-Version: 1.0
+## Version: 1.0
 
