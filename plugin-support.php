@@ -65,7 +65,7 @@ class Pleasant_Plugin_Notices {
 	function get_dependencies() {
 
 		// The filter where all plugins needed will be passed
-		$dependencies = apply_filters( 's2_plugin_dependencies', array() );
+		$dependencies = apply_filters( 'pleasant_plugin_notices', array() );
 
 		// loop through dependencies and preprocess them
 		foreach ( $dependencies as $slug => $dependency ) {

@@ -17,12 +17,12 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 	}
 	```
 
-3. Add a filter for `s2_plugin_dependencies` function.
+3. Add a filter for `pleasant_plugin_notices` function.
 	```php
 	function my_theme_dependencies( $plugins ){
 		return $plugins;
 	}
-	add_filter( 's2_plugin_dependencies', 'my_theme_dependencies' );
+	add_filter( 'pleasant_plugin_notices', 'my_theme_dependencies' );
 	```
 
 4. And add each dependency to the `$plugins` array along with its details.
@@ -71,7 +71,7 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 		);
 		return $plugins;
 	}
-	add_filter( 's2_plugin_dependencies', 'my_theme_dependencies' );
+	add_filter( 'pleasant_plugin_notices', 'my_theme_dependencies' );
 	
 	```
 
