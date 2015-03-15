@@ -57,8 +57,9 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 ### A complete example, using CMB2:
 
 	```php
+	
 	if ( is_admin() ){
-		include_once get_stylesheet_directory().'/path-to-library/plugin-support.php';
+		include_once get_stylesheet_directory() . '/path-to-library/plugin-support.php';
 		if ( class_exists( 'S2_Plugin_Dependency' ) ) {
 			new S2_Plugin_Dependency();
 		}
@@ -71,6 +72,7 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 		return $plugins;
 	}
 	add_filter( 's2_plugin_dependencies', 'my_theme_dependencies' );
+	
 	```
 
 Version: 1.0
