@@ -51,7 +51,7 @@ class Pleasant_Plugin_Notices {
 	 */
 	function __construct(){
 
-		$this->notice_text_pattern = __( 'This theme requires the %s plugin', 'your-theme-domain' );
+		$this->notice_text_pattern = __( 'This theme requires the %s plugin', 'pleasant-plugin-notices' );
 
 		add_action( 'admin_notices', array( $this, 'check_dependencies' ) );
 	}
@@ -218,7 +218,7 @@ class Pleasant_Plugin_Notices {
 	function output_notice( $notice_text ) {
 		?>
 		<div class="error">
-			<p><strong><?php _e( 'Theme dependency warning', 'your-theme-domain' ) ?>: </strong><?php echo $notice_text; ?></p>
+			<p><strong><?php _e( 'Theme dependency warning', 'pleasant-plugin-notices' ) ?>: </strong><?php echo $notice_text; ?></p>
 		</div>
 		<?php
 	}
