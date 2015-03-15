@@ -2,7 +2,7 @@
 
 A super simple lightweight way to add admin notices to a theme when that requires a couple plugins for certain functionality. The notices will appear when the plugins you include are inactive. The notices will provide a link to the plugin installation window. That's it!
 
-No warning notices, no error messages, just a nice way of saying, "Hey, you need this for things to work right."
+No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might need this for things to work right."
 
 ### Installing
 
