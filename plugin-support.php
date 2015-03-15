@@ -16,7 +16,7 @@ class S2_Plugin_Dependency {
 	private $link_pattern = '<a href="%1$s" target="_blank">%2$s</a>';
 
 	// Generic notice text
-	private $notice_text_pattern = __( 'This theme requires the %s plugin', 'your-theme-domain' );
+	private $notice_text_pattern = '';
 
 	/*
 	 * almost everything defaults to false for easy logic when parsing
@@ -50,6 +50,9 @@ class S2_Plugin_Dependency {
 	 * Hook into WordPress
 	 */
 	function __construct(){
+
+		$this->notice_text_pattern = __( 'This theme requires the %s plugin', 'your-theme-domain' );
+
 		add_action( 'admin_notices', array( $this, 'check_dependencies' ) );
 	}
 
