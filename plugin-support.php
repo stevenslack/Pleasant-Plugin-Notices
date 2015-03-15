@@ -223,7 +223,7 @@ class Pleasant_Plugin_Notices {
 	function output_notice( $notice_text ) {
 		?>
 		<div class="error">
-			<p><strong><?php echo $this->$notice_prefix; ?>: </strong><?php echo $notice_text; ?></p>
+			<p><strong><?php echo $this->notice_prefix; ?>: </strong><?php echo $notice_text; ?></p>
 		</div>
 		<?php
 	}
