@@ -16,7 +16,7 @@ class Pleasant_Plugin_Notices {
 	private $link_pattern = '<a href="%1$s" target="_blank">%2$s</a>';
 
 	// The notice prefix
-	private $notice_prefix = ''
+	private $notice_prefix = '';
 
 	// Generic notice text
 	private $notice_text_pattern = '';
