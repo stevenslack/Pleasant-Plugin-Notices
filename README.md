@@ -1,4 +1,4 @@
-## S2 Plugin Dependencies
+## Pleasant Plugin Notices
 
 A super simple lightweight way to add admin notices to a theme when that requires a couple plugins for certain functionality. The notices will appear when the plugins you include are inactive. The notices will provide a link to the plugin installation window. That's it!
 
@@ -54,10 +54,9 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 	);
 	```
 
-### A complete example, using CMB2:
+### A complete example, using CMB2.
 
-	```php
-	
+	```php	
 	if ( is_admin() ){
 		include_once get_stylesheet_directory() . '/path-to-library/plugin-support.php';
 		if ( class_exists( 'Pleasant_Plugin_Notices' ) ) {
@@ -71,8 +70,7 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 		);
 		return $plugins;
 	}
-	add_filter( 'pleasant_plugin_notices', 'my_theme_dependencies' );
-	
+	add_filter( 'pleasant_plugin_notices', 'my_theme_dependencies' );	
 	```
 
 Version: 1.0
