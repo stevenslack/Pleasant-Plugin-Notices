@@ -56,22 +56,22 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 
 ### A complete example, using CMB2.
 
-	```php	
-	if ( is_admin() ){
-		include_once get_stylesheet_directory() . '/path-to-library/plugin-support.php';
-		if ( class_exists( 'Pleasant_Plugin_Notices' ) ) {
-			new Pleasant_Plugin_Notices();
-		}
+```php
+if ( is_admin() ){
+	include_once get_stylesheet_directory() . '/path-to-library/plugin-support.php';
+	if ( class_exists( 'Pleasant_Plugin_Notices' ) ) {
+		new Pleasant_Plugin_Notices();
 	}
+}
 
-	function my_theme_dependencies( $plugins ){
-		$plugins['cmb2'] = array(
-			'name' => 'CMB2',
-		);
-		return $plugins;
-	}
-	add_filter( 'pleasant_plugin_notices', 'my_theme_dependencies' );	
-	```
+function my_theme_dependencies( $plugins ){
+	$plugins['cmb2'] = array(
+		'name' => 'CMB2',
+	);
+	return $plugins;
+}
+add_filter( 'pleasant_plugin_notices', 'my_theme_dependencies' );	
+```
 
 Version: 1.0
 
