@@ -74,8 +74,11 @@ class Pleasant_Plugin_Notices {
 		$this->notice_prefix = __( 'Theme dependency notice', 'pleasant-plugin-notices' );
 
 		$this->notice_text_pattern = __( 'This theme requires the %s plugin', 'pleasant-plugin-notices' );
-
-		add_action( 'admin_notices', array( $this, 'check_dependencies' ) );
+		
+		// If the current user can install / deactivate plugins display notices
+		if ( current_user_can( 'install_plugins' ) ) {
+			add_action( 'admin_notices', array( $this, 'check_dependencies' ) );
+		}
 	}
 
 
