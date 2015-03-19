@@ -12,7 +12,7 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 2. In your functions.php file, include the library and initialize it
 	```php
 	if ( is_admin() ){
-		include_once get_stylesheet_directory().'/path-to-library/plugin-support.php';
+		include_once get_stylesheet_directory().'/path-to-library/pleasant-plugin-notices.php';
 	}
 	```
 
@@ -57,7 +57,7 @@ No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might
 
 ```php
 if ( is_admin() ){
-	include_once get_stylesheet_directory() . '/path-to-library/plugin-support.php';
+	include_once get_stylesheet_directory() . '/path-to-library/pleasant-plugin-notices.php';
 }
 
 function my_theme_dependencies( $plugins ){
