@@ -24,6 +24,12 @@ class Pleasant_Plugin_Notices {
 	// Generic notice text
 	private $notice_text_pattern = '';
 
+	// wp option_table option name
+	private $option_name = 'pleasant_plugin_notices';
+
+	// variable used to pass dismiss action
+	private $dismiss_url_var = 'ppn_dismiss';
+
 	/*
 	 * almost everything defaults to false for easy logic when parsing
 	 * the exception being 'public', since true is the most-likely use-case
@@ -81,7 +87,6 @@ class Pleasant_Plugin_Notices {
 		}
 	}
 
-
 	/**
 	 * Gather all dependencies
 	 *
@@ -91,6 +96,15 @@ class Pleasant_Plugin_Notices {
 
 		// The filter where all plugins needed will be passed
 		$dependencies = apply_filters( 'pleasant_plugin_notices', array() );
+		$notices_data = get_option( $this->option_name, array() );
+
+		// check for dismissal
+		if ( isset( $_GET[ $this->dismiss_url_var ] ) ) {
+			$notices_data[ $_GET[ $this->dismiss_url_var ] ]['dismissed'] = true;
+		}
+
+		// save our notices data
+		update_option( $this->option_name, $notices_data );
 
 		// loop through dependencies and preprocess them
 		foreach ( $dependencies as $slug => $dependency ) {
@@ -100,6 +114,13 @@ class Pleasant_Plugin_Notices {
 			// remember plugin data within the dependency for later
 			$dependency['plugin_data'] = $this->get_plugin_data_from_slug( $slug );
 			$dependency['slug'] = $slug;
+
+			// determine if this dependency has been dismissed already
+			$dependency['dismissed'] = false;
+
+			if ( isset( $notices_data[ $slug ] ) && $notices_data[ $slug ]['dismissed'] ) {
+				$dependency['dismissed'] = true;
+			}
 
 			// get the dependency name if not defined
 			if ( ! $dependency['name'] ) {
@@ -113,7 +134,6 @@ class Pleasant_Plugin_Notices {
 
 		return $dependencies;
 	}
-
 
 	/**
 	 * Process dependencies and output any needed notices
@@ -130,9 +150,21 @@ class Pleasant_Plugin_Notices {
 				continue;
 			}
 
+			// if notice has been dismissed, do not show it
+			if ( $dependency['dismissed'] ) {
+				continue;
+			}
+
+			// make a notice array that we'll ultimately pass along to the output method
+			$notice = array(
+			  'text' => '',
+			  'dependency' => $dependency,
+			  'dismiss_url' => $this->make_dismiss_url( $slug ),
+			);
+
 			// a custom notice overrides all other possible output
 			if ( $dependency['notice'] ){
-				$notice_text = wp_kses( $dependency['notice'], $this->notice_allowed_html );
+				$notice['text'] = wp_kses( $dependency['notice'], $this->notice_allowed_html );
 			}
 
 			// otherwise, parse the dependency and create a notice_text
@@ -147,13 +179,12 @@ class Pleasant_Plugin_Notices {
 				}
 
 				// get the notice text
-				$notice_text = sprintf( __( $this->notice_text_pattern ), $link_string );
+				$notice['text'] = sprintf( __( $this->notice_text_pattern ), $link_string );
 			}
 
-			$this->output_notice( $notice_text );
+			$this->output_notice( $notice );
 		}
 	}
-
 
 	/**
 	 * Get the WordPress meta data for a plugin using its slug (directory)
@@ -234,17 +265,47 @@ class Pleasant_Plugin_Notices {
 		return $url;
 	}
 
+	/**
+	 * Create a link for dismissing an individual notice
+	 *
+	 * @param $plugin_slug
+	 * @return string
+	 */
+	function make_dismiss_url( $plugin_slug ){
+		global $pagenow;
+
+		// retain current page url.uri.query
+		$query = array();
+		parse_str( $_SERVER['QUERY_STRING'], $query );
+
+		// add our query var
+		$query[ $this->dismiss_url_var ] = $plugin_slug;
+
+		// make a relative uri
+		$dismiss_url = $pagenow . '?' . http_build_query( $query );
+
+		// convert relative uri into admin url
+		if ( is_multisite() ) {
+			$url = network_admin_url( $dismiss_url );
+		}
+		else {
+			$url = admin_url( $dismiss_url );
+		}
+
+		return $url;
+	}
 
 	/**
 	* Output HTML notice
 	*
-	* @param $notice_text
+	* @param $notice
 	*/
-	function output_notice( $notice_text ) {
+	function output_notice( $notice ) {
 		?>
-		<div class="error">
-			<p><strong><?php echo $this->notice_prefix; ?>: </strong><?php echo $notice_text; ?></p>
-		</div>
+	    <div class="error">
+		    <a href="<?php echo esc_attr( $notice['dismiss_url'] ); ?>">dismiss</a>
+		    <p><strong><?php echo $this->notice_prefix; ?>: </strong><?php echo $notice['text']; ?></p>
+	    </div>
 		<?php
 	}
 
