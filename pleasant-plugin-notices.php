@@ -204,7 +204,7 @@ class Pleasant_Plugin_Notices {
 		// get all plugins within the plugin-slug directory
 		$plugins = get_plugins( '/' . $plugin_slug ); // Retrieve all plugins.
 
-		if  ( ! empty( $plugins ) ) {
+		if ( ! empty( $plugins ) ) {
 			// the keys of the returned array are the plugin file names
 			$plugin_keys = array_keys( $plugins );
 
@@ -214,6 +214,11 @@ class Pleasant_Plugin_Notices {
 			// construct the plugin_file from the plugin-slug (directory)
 			// and the plugin's key (file name);
 			$plugin_data['plugin_file'] = $plugin_slug . '/' . $plugin_keys[0];
+		} else {
+			// look for a single-file plugin, just in case
+			$plugin = WP_PLUGIN_DIR . $plugin_slug . '.php';
+
+			$plugin_data['plugin_file'] = $plugin_slug . '.php';
 		}
 
 		return $plugin_data;
