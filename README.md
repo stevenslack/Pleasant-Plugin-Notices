@@ -6,6 +6,8 @@ That's it!
 
 No forced downloads, no fetching, just a nice way of suggesting, "Hey, you might need this plugin."
 
+**Please note - this only works with plugins that exist in a directory. No Hello Dolly because it's just one file, `hello.php`.**
+
 ### Installing
 
 1. Download the library to your theme
