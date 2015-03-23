@@ -303,8 +303,10 @@ class Pleasant_Plugin_Notices {
 	function output_notice( $notice ) {
 		?>
 	    <div class="error">
-		    <a href="<?php echo esc_attr( $notice['dismiss_url'] ); ?>">dismiss</a>
-		    <p><strong><?php echo $this->notice_prefix; ?>: </strong><?php echo $notice['text']; ?></p>
+    		<p>
+			<strong><?php echo $this->notice_prefix; ?>: </strong><?php echo $notice['text']; ?>
+			<a class="button" href="<?php echo esc_attr( $notice['dismiss_url'] ); ?>"><?php _e( 'dismiss', 'pleasant-plugin-notices' ); ?></a>
+		</p>
 	    </div>
 		<?php
 	}
