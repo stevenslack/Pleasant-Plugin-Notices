@@ -5,7 +5,7 @@
  * Plugin Name: Pleasant Plugin Notices
  * Plugin URI: https://github.com/S2web/Pleasant-Plugin-Notices
  * Description: Adds admin notices to a theme which requires plugins for certain functionality.
- * Version: 1.0
+ * Version: 1.1
  * Authors: Steven Slack <http://stevenslack.com>, Jonathan Daggerhart <http://daggerhart.com>, Julien Melissas <http://julienmelissas.com>
  * Author URI: http://stevenslack.com
  */
@@ -13,6 +13,8 @@
 if ( ! defined('ABSPATH') ) { 
 	die;
 }
+
+if ( ! class_exists( 'Pleasant_Plugin_Notices' ) ) :
 
 class Pleasant_Plugin_Notices {
 
@@ -94,8 +96,6 @@ class Pleasant_Plugin_Notices {
 		// If the current user can install / deactivate plugins display notices
 		if ( current_user_can( 'install_plugins' ) ) {
 			add_action( 'admin_notices', array( $this, 'check_dependencies' ) );
-
-			add_action( 'admin_init', array( $this, 'dismiss_notice' ) );
 		}
 	}
 
@@ -112,11 +112,12 @@ class Pleasant_Plugin_Notices {
 
 		// check for dismissal
 		if ( isset( $_GET[ $this->dismiss_url_var ] ) ) {
+			// a notice was dismissed
 			$notices_data[ $_GET[ $this->dismiss_url_var ] ]['dismissed'] = true;
-		}
 
-		// save our notices data
-		update_option( $this->option_name, $notices_data );
+			// save our notices data
+			update_option( $this->option_name, $notices_data );
+		}
 
 		// loop through dependencies and preprocess them
 		foreach ( $dependencies as $slug => $dependency ) {
@@ -161,8 +162,13 @@ class Pleasant_Plugin_Notices {
 		// loop through dependencies and process them as notices
 		foreach ( $dependencies as $slug => $dependency ) {
 
-			// if the plugin is active, do not display a notice
+			// if the dependency is active, do not display a notice
 			if ( $dependency['plugin_data'] && isset( $dependency['plugin_data']['plugin_file'] ) && is_plugin_active( $dependency['plugin_data']['plugin_file'] ) ) {
+				continue;
+			}
+
+			// if the dependency is dismiss, do not display the notice
+			if ( isset( $dependency['dismissed'] ) && $dependency['dismissed'] ) {
 				continue;
 			}
 
@@ -192,10 +198,8 @@ class Pleasant_Plugin_Notices {
 				$notice['text'] = sprintf( __( $this->notice_text_pattern ), $link_string );
 			}
 
-			// if the user hasn't dismissed the notice display the notice
-			if ( ! get_user_meta( $user_id, 'dismiss_notices' ) ) {
-				$this->output_notice( $notice );
-			}
+			// dependency notice is processed, display the notice
+			$this->output_notice( $notice );
 		}
 	}
 
@@ -278,21 +282,35 @@ class Pleasant_Plugin_Notices {
 		return $url;
 	}
 
-
 	/**
-	 * Dismiss the notice by saving their user preferences to hide the notice
+	 * Create a link for dismissing an individual notice
+	 *
+	 * @param $plugin_slug
+	 * @return string
 	 */
-	function dismiss_notice() {
+	function make_dismiss_url( $plugin_slug ){
+		global $pagenow;
 
-		global $current_user;
+		// retain current page url.uri.query
+		$query = array();
+		parse_str( $_SERVER['QUERY_STRING'], $query );
 
-		$user_id = $current_user->ID;
-		// If user clicks to ignore the notice, add that to their user meta
-		if ( isset( $_GET['dismiss_notice'] ) && '0' == $_GET['dismiss_notice'] ) {
-			add_user_meta( $user_id, 'dismiss_notices', 'true', true );
+		// add/replace our query var
+		$query[ $this->dismiss_url_var ] = $plugin_slug;
+
+		// make a relative uri
+		$dismiss_url = $pagenow . '?' . http_build_query( $query );
+
+		// convert relative uri into admin url
+		if ( is_multisite() ) {
+			$url = network_admin_url( $dismiss_url );
 		}
-	}
+		else {
+			$url = admin_url( $dismiss_url );
+		}
 
+		return $url;
+	}
 
 	/**
 	* Output HTML notice
@@ -300,17 +318,20 @@ class Pleasant_Plugin_Notices {
 	* @param $notice
 	*/
 	function output_notice( $notice ) {
+		$dismiss_url = $this->make_dismiss_url( $notice['dependency']['slug'] );
 		?>
 	    <div class="error">
     		<p>
 			<strong><?php echo $this->notice_prefix; ?>: </strong><?php echo $notice['text']; ?>
-			<a class="button" href="<?php echo '?dismiss_notice=0'; ?>" style="margin-left:15px;"><?php _e( 'dismiss notices', 'pleasant-plugin-notices' ); ?></a>
+			<a class="button" href="<?php echo esc_attr( $dismiss_url ) ; ?>" style="margin-left:15px;"><?php _e( 'dismiss notices', 'pleasant-plugin-notices' ); ?></a>
 		</p>
 	    </div>
 		<?php
 	}
 
 } // end class Pleasant_Plugin_Notices
+
+endif;
 
 // initialize the library
 Pleasant_Plugin_Notices::get_instance(); 

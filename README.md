@@ -71,5 +71,5 @@ function my_theme_dependencies( $plugins ){
 add_filter( 'pleasant_plugin_notices', 'my_theme_dependencies' );	
 ```
 
-## Version: 1.0
+## Version: 1.1
 
